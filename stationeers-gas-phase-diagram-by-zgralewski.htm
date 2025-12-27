@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stationeers Gas Phase Diagram</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #1a1a1a; font-family: sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/prop-types@15/prop-types.min.js" crossorigin></script>
+  <script src="https://unpkg.com/recharts@2.10.3/umd/Recharts.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+    const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Customized } = Recharts;
+
+    // ============================================================
+    // GAS DATA - Phase change properties for Stationeers gases
+    // ============================================================
+    const gasData = {
+      N2:  { name: 'Nitrogen',        symbol: 'N₂',  color: '#444444', labelColor: '#999999', meltK: 40,  maxLiqK: 190, minCondKPa: 6.3,  maxKPa: 6000, convexity: 0.71 },
+      O2:  { name: 'Oxygen',          symbol: 'O₂',  color: '#ffffff', labelColor: '#ffffff', meltK: 56,  maxLiqK: 162, minCondKPa: 6.3,  maxKPa: 6000, convexity: 0.54 },
+      H2:  { name: 'Volatiles',       symbol: 'H₂',  color: '#ff4444', labelColor: '#ff4444', meltK: 81,  maxLiqK: 195, minCondKPa: 6.3,  maxKPa: 6000, convexity: 0.72 },
+      X:   { name: 'Pollutant',       symbol: 'X',   color: '#ffcc00', labelColor: '#ffcc00', meltK: 173, maxLiqK: 425, minCondKPa: 1800, maxKPa: 6000, convexity: 0.5 },
+      CO2: { name: 'Carbon Dioxide',  symbol: 'CO₂', color: '#888888', labelColor: '#888888', meltK: 218, maxLiqK: 265, minCondKPa: 517,  maxKPa: 6000, convexity: 0.5 },
+      N2O: { name: 'Nitrous Oxide',   symbol: 'N₂O', color: '#44cc44', labelColor: '#44cc44', meltK: 252, maxLiqK: 431, minCondKPa: 800,  maxKPa: 2000, convexity: 0.5 },
+      H2O: { name: 'Water',           symbol: 'H₂O', color: '#4488ff', labelColor: '#4488ff', meltK: 273, maxLiqK: 643, minCondKPa: 6.3,  maxKPa: 6000, convexity: 0.5 },
+    };
+
+    // ============================================================
+    // LABEL POSITION OVERRIDES - Adjust x,y offsets per gas
+    // melt = melting point label (bottom)
+    // max = max liquid temp label (top)
+    // x: positive = right, negative = left
+    // y: positive = down, negative = up
+    // ============================================================
+    const labelOverrides = {
+      N2:  { melt: { x: 0,  y: 0 },   max: { x: -15, y: 0 } },
+      O2:  { melt: { x: 23,  y: 0 },   max: { x: -30, y: 0 } },
+      H2:  { melt: { x: 40,  y: -120 },   max: { x: 40,  y: 60 } },
+      X:   { melt: { x: 0,  y: -420 },   max: { x: 0,   y: 0 } },
+      CO2: { melt: { x: 0,  y: -340 },   max: { x: 0,   y: 0 } },
+      N2O: { melt: { x: 0,  y: -370 },   max: { x: 30,   y: 135 } },
+      H2O: { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
+    };
+
+    // ============================================================
+    // LABEL COLOR OVERRIDES - Override label colors per gas
+    // Set different colors for melt and max labels if needed
+    // If not specified, uses the gas's default labelColor
+    // ============================================================
+    const labelColorOverrides = {
+      // Example: To override colors for a specific gas:
+      // N2: { melt: '#ff0000', max: '#00ff00' },
+      // O2: { melt: '#ffffff', max: '#cccccc' },
+      // If a gas is not listed here, it will use the default labelColor from gasData
+    };
+
+    // ============================================================
+    // CONSTANTS
+    // ============================================================
+    const MIN_PRESSURE = 6.3;
+    const MAX_PRESSURE_DISPLAY = 8000;
+
+    // Bezier-like interpolation for saturation curve
+    function calcPressure(tempK, gas) {
+      const { meltK, maxLiqK, minCondKPa, maxKPa, convexity } = gas;
+      if (tempK < meltK || tempK > maxLiqK) return null;
+      const t = (tempK - meltK) / (maxLiqK - meltK);
+      const exponent = 2 * (1 - t) * t * convexity + t * t;
+      return minCondKPa * Math.pow(maxKPa / minCondKPa, exponent);
+    }
+
+    const kToC = (k) => Math.round(k - 273);
+    const formatP = (p) => p >= 1000 ? `${(p/1000).toFixed(1)}MPa` : `${Math.round(p)}kPa`;
+
+    // Custom X axis tick with Kelvin and Celsius
+    const CustomXTick = ({ x, y, payload }) => {
+      const tempK = payload.value;
+      const tempC = kToC(tempK);
+      return (
+        <g transform={`translate(${x},${y})`}>
+          <text x={0} y={0} dy={16} textAnchor="middle" fill="#aaa" fontSize={14}>
+            {tempK}K
+          </text>
+          <text x={0} y={0} dy={30} textAnchor="middle" fill="#666" fontSize={14}>
+            {tempC}°C
+          </text>
+        </g>
+      );
+    };
+
+    // Custom component for vertical segments and multiline labels with backgrounds
+    const CustomElements = ({ xAxisMap, yAxisMap, visibleGases }) => {
+      if (!xAxisMap || !yAxisMap) return null;
+
+      const xAxis = Object.values(xAxisMap)[0];
+      const yAxis = Object.values(yAxisMap)[0];
+
+      if (!xAxis || !yAxis || !xAxis.scale || !yAxis.scale) return null;
+
+      const elements = [];
+      const lineHeight = 16; // Line height for label text
+      const padding = 2; // Padding between lines
+      const labelWidth = 40; // Width of the label background
+      const labelHeight = 4 * lineHeight + 2 * padding; // Total height of the label background
+
+      const chartTop = yAxis.y;
+      const chartBottom = yAxis.y + yAxis.height;
+
+      Object.entries(gasData).forEach(([key, gas]) => {
+        if (!visibleGases[key]) return;
+
+        const override = labelOverrides[key] || { melt: { x: 0, y: 0 }, max: { x: 0, y: 0 } };
+        const colorOverride = labelColorOverrides[key] || {};
+        const meltLabelColor = colorOverride.melt || gas.labelColor;
+        const maxLabelColor = colorOverride.max || gas.labelColor;
+
+        const xMelt = xAxis.scale(gas.meltK);
+        const xMax = xAxis.scale(gas.maxLiqK);
+        const yMeltTop = yAxis.scale(gas.minCondKPa);
+        const yMaxBottom = yAxis.scale(gas.maxKPa);
+
+        // Vertical line at melting point (down to bottom)
+        elements.push(
+          <line
+            key={`${key}-melt-line`}
+            x1={xMelt}
+            y1={yMeltTop}
+            x2={xMelt}
+            y2={chartBottom}
+            stroke={gas.color}
+            strokeWidth={2}
+            strokeDasharray="4 4"
+            opacity={0.7}
+          />
+        );
+
+        // Vertical line at max liquid (up to top)
+        elements.push(
+          <line
+            key={`${key}-max-line`}
+            x1={xMax}
+            y1={yMaxBottom}
+            x2={xMax}
+            y2={chartTop}
+            stroke={gas.color}
+            strokeWidth={2}
+            strokeDasharray="4 4"
+            opacity={0.7}
+          />
+        );
+
+        // Melt label position (BELOW chart area)
+        const meltLabelX = xMelt + override.melt.x;
+        const meltLabelY = chartBottom + 45 + override.melt.y;
+
+        // Background rect for melt label
+        elements.push(
+          <rect
+            key={`${key}-melt-bg`}
+            x={meltLabelX - labelWidth / 2 - padding}
+            y={meltLabelY - padding}
+            width={labelWidth + 2 * padding}
+            height={labelHeight}
+            fill="#1a1a1a"
+            rx={2}
+          />
+        );
+
+        // Melt label text
+        elements.push(
+          <text
+            key={`${key}-melt-label`}
+            x={meltLabelX}
+            y={meltLabelY + lineHeight}
+            fill={meltLabelColor}
+            fontSize={14}
+            textAnchor="middle"
+          >
+            <tspan x={meltLabelX} dy="0">{gas.symbol}</tspan>
+            <tspan x={meltLabelX} dy={lineHeight}>{gas.meltK}K</tspan>
+            <tspan x={meltLabelX} dy={lineHeight}>{kToC(gas.meltK)}°C</tspan>
+            <tspan x={meltLabelX} dy={lineHeight}>{formatP(gas.minCondKPa)}</tspan>
+          </text>
+        );
+
+        // Max label position (ABOVE chart area)
+        const maxLabelX = xMax + override.max.x;
+        const maxLabelY = chartTop - labelHeight - 5 + override.max.y;
+
+        // Background rect for max label
+        elements.push(
+          <rect
+            key={`${key}-max-bg`}
+            x={maxLabelX - labelWidth / 2 - padding}
+            y={maxLabelY - padding}
+            width={labelWidth + 2 * padding}
+            height={labelHeight}
+            fill="#1a1a1a"
+            rx={2}
+          />
+        );
+
+        // Max label text
+        elements.push(
+          <text
+            key={`${key}-max-label`}
+            x={maxLabelX}
+            y={maxLabelY + lineHeight}
+            fill={maxLabelColor}
+            fontSize={14}
+            textAnchor="middle"
+          >
+            <tspan x={maxLabelX} dy="0">{gas.symbol}</tspan>
+            <tspan x={maxLabelX} dy={lineHeight}>{gas.maxLiqK}K</tspan>
+            <tspan x={maxLabelX} dy={lineHeight}>{kToC(gas.maxLiqK)}°C</tspan>
+            <tspan x={maxLabelX} dy={lineHeight}>{formatP(gas.maxKPa)}</tspan>
+          </text>
+        );
+      });
+
+      return <g>{elements}</g>;
+    };
+
+    function PhaseDiagram() {
+      const [visibleGases, setVisibleGases] = useState(
+        Object.keys(gasData).reduce((acc, key) => ({ ...acc, [key]: true }), {})
+      );
+      const [showGrid, setShowGrid] = useState(true);
+      const [logScale, setLogScale] = useState(true);
+
+      const allData = useMemo(() => {
+        const combined = [];
+        for (let t = 30; t <= 660; t += 2) {
+          const point = { tempK: t };
+          Object.entries(gasData).forEach(([key, gas]) => {
+            point[key] = calcPressure(t, gas);
+          });
+          combined.push(point);
+        }
+        return combined;
+      }, []);
+
+      const toggleGas = (gasKey) => {
+        setVisibleGases(prev => ({ ...prev, [gasKey]: !prev[gasKey] }));
+      };
+
+      const CustomTooltip = ({ active, payload, label }) => {
+        if (!active || !payload || !payload.length) return null;
+        const validPayload = payload.filter(p => p.value != null);
+        if (!validPayload.length) return null;
+
+        return (
+          <div style={{
+            background: 'rgba(30,30,30,0.95)',
+            border: '1px solid #555',
+            padding: '10px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            color: '#eee'
+          }}>
+            <p style={{ margin: 0, fontWeight: 'bold', color: '#fff' }}>
+              {label}K ({kToC(label)}°C)
+            </p>
+            {validPayload.map((entry, i) => {
+              const gasKey = entry.dataKey;
+              const colorOverride = labelColorOverrides[gasKey] || {};
+              // Use labelColor (or override) for tooltip text instead of line color
+              const tooltipColor = colorOverride.melt || gasData[gasKey]?.labelColor || entry.color;
+
+              return (
+                <p key={i} style={{ margin: '4px 0 0', color: tooltipColor }}>
+                  {gasData[gasKey]?.symbol}: {formatP(entry.value)}
+                </p>
+              );
+            })}
+          </div>
+        );
+      };
+
+      const EndpointDot = ({ cx, cy, payload, dataKey }) => {
+        if (!cx || !cy || !payload || !dataKey) return null;
+        const gas = gasData[dataKey];
+        if (!gas) return null;
+
+        const prevTemp = payload.tempK - 2;
+        const nextTemp = payload.tempK + 2;
+        const hasPrev = calcPressure(prevTemp, gas) !== null;
+        const hasNext = calcPressure(nextTemp, gas) !== null;
+
+        if ((!hasPrev && hasNext) || (hasPrev && !hasNext)) {
+          return <circle cx={cx} cy={cy} r={5} fill={gas.color} stroke="#1a1a1a" strokeWidth={2} />;
+        }
+        return null;
+      };
+
+      return (
+        <div style={{
+          width: '100%',
+          padding: '20px',
+          fontFamily: 'sans-serif',
+          background: '#1a1a1a',
+          color: '#eee',
+          minHeight: '100vh'
+        }}>
+          <h2 style={{ textAlign: 'center', marginBottom: '10px', color: '#fff' }}>
+            Stationeers Gas Phase Diagram
+          </h2>
+          <p style={{ textAlign: 'center', color: '#888', fontSize: '12px', marginBottom: '20px' }}>
+            Saturation curves - above line = liquid possible, below = gas only
+          </p>
+
+          {/* Controls */}
+          <div style={{
+            display: 'flex',
+            gap: '20px',
+            marginBottom: '20px',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            background: '#252525',
+            padding: '10px',
+            borderRadius: '8px'
+          }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+              <input type="checkbox" checked={showGrid} onChange={() => setShowGrid(!showGrid)} />
+              Grid
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+              <input type="checkbox" checked={logScale} onChange={() => setLogScale(!logScale)} />
+              Log Scale
+            </label>
+            <span style={{ borderLeft: '1px solid #444', paddingLeft: '20px' }}>Gases:</span>
+            {Object.entries(gasData).map(([key, gas]) => (
+              <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={visibleGases[key]}
+                  onChange={() => toggleGas(key)}
+                />
+                <span style={{
+                  width: '14px',
+                  height: '14px',
+                  background: gas.color,
+                  display: 'inline-block',
+                  border: '1px solid #666',
+                  borderRadius: '2px'
+                }} />
+                {gas.symbol}
+              </label>
+            ))}
+          </div>
+
+          {/* Chart */}
+          <ResponsiveContainer width="100%" height={750}>
+            <LineChart data={allData} margin={{ top: 80, right: 40, left: 60, bottom: 120 }}>
+              {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#333" />}
+
+              <XAxis
+                dataKey="tempK"
+                type="number"
+                domain={[30, 680]}
+                stroke="#888"
+                tick={<CustomXTick />}
+                ticks={[50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650]}
+                height={50}
+              />
+
+              <YAxis
+                scale={logScale ? 'log' : 'linear'}
+                domain={logScale ? [5, 8000] : [0, 6500]}
+                stroke="#888"
+                tick={{ fill: '#aaa', fontSize: 14 }}
+                tickFormatter={(v) => v >= 1000 ? `${v/1000}M` : `${v}`}
+                label={{ value: 'Pressure (kPa)', angle: -90, position: 'insideLeft', offset: -10, fill: '#aaa' }}
+                ticks={logScale ? [10, 50, 100, 500, 1000, 2000, 4000, 6000] : [0, 1000, 2000, 3000, 4000, 5000, 6000]}
+              />
+
+              <Tooltip content={<CustomTooltip />} />
+
+              {/* Custom vertical segments and multiline labels */}
+              <Customized component={(props) => <CustomElements {...props} visibleGases={visibleGases} />} />
+
+              {/* 0°C reference line */}
+              <ReferenceLine
+                x={273}
+                stroke="#4488ff"
+                strokeDasharray="5 5"
+                strokeWidth={1}
+              />
+
+              {/* Gas saturation curves */}
+              {Object.entries(gasData).map(([key, gas]) => (
+                visibleGases[key] && (
+                  <Line
+                    key={key}
+                    type="monotone"
+                    dataKey={key}
+                    stroke={gas.color}
+                    strokeWidth={3}
+                    dot={<EndpointDot dataKey={key} />}
+                    activeDot={{ r: 5, fill: gas.color, stroke: '#fff', strokeWidth: 2 }}
+                    connectNulls={false}
+                    name={gas.symbol}
+                  />
+                )
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<PhaseDiagram />);
+  </script>
+</body>
+</html>

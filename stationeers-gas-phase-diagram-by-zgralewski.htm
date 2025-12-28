@@ -237,7 +237,7 @@
       );
       const [showGrid, setShowGrid] = useState(true);
       const [logScale, setLogScale] = useState(true);
-      const [activeP, setActiveP] = useState(null);
+      const [activePs, setActivePs] = useState([]);
 
       const allData = useMemo(() => {
         const combined = [];
@@ -367,14 +367,15 @@
               margin={{ top: 80, right: 40, left: 60, bottom: 120 }}
               onMouseMove={(e) => {
                 if (e && e.activePayload && e.activePayload.length > 0) {
-                  // Find the first non-null value to use as reference for horizontal line
-                  const val = e.activePayload.find(p => p.value !== null)?.value;
-                  setActiveP(val || null);
+                  const vals = e.activePayload
+                    .filter(p => p.value !== null)
+                    .map(p => p.value);
+                  setActivePs(vals);
                 } else {
-                  setActiveP(null);
+                  setActivePs([]);
                 }
               }}
-              onMouseLeave={() => setActiveP(null)}
+              onMouseLeave={() => setActivePs([])}
             >
               {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#333" />}
 
@@ -403,16 +404,17 @@
                 cursor={{ stroke: '#aaa', strokeWidth: 1, strokeDasharray: '4 4', opacity: 0.8 }}
               />
 
-              {/* Horizontal cursor line */}
-              {activeP && (
+              {/* Horizontal cursor lines */}
+              {activePs.map((p, idx) => (
                 <ReferenceLine
-                  y={activeP}
+                  key={`h-cursor-${idx}`}
+                  y={p}
                   stroke="#aaa"
                   strokeDasharray="4 4"
                   opacity={0.4}
                   isFront={true}
                 />
-              )}
+              ))}
 
               {/* Custom vertical segments and multiline labels */}
               <Customized component={(props) => <CustomElements {...props} visibleGases={visibleGases} />} />

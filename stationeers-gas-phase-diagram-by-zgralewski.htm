@@ -32,7 +32,7 @@
       X:   { name: 'Pollutant',       symbol: 'X',   color: '#ffcc00', labelColor: '#ffcc00', meltK: 173, maxLiqK: 425, minCondKPa: 1800, maxKPa: 6000, convexity: 0.5 },
       CO2: { name: 'Carbon Dioxide',  symbol: 'CO₂', color: '#888888', labelColor: '#888888', meltK: 218, maxLiqK: 265, minCondKPa: 517,  maxKPa: 6000, convexity: 0.5 },
       N2O: { name: 'Nitrous Oxide',   symbol: 'N₂O', color: '#44cc44', labelColor: '#44cc44', meltK: 252, maxLiqK: 431, minCondKPa: 800,  maxKPa: 2000, convexity: 0.5 },
-      H2O: { name: 'Water',           symbol: 'H₂O', color: '#4488ff', labelColor: '#4488ff', meltK: 273, maxLiqK: 643, minCondKPa: 6.3,  maxKPa: 6000, convexity: 0.6 },
+      H2O: { name: 'Water',           symbol: 'H₂O', color: '#4488ff', labelColor: '#4488ff', meltK: 273, maxLiqK: 643, minCondKPa: 6.3,  maxKPa: 6000, convexity: 0.8367 },
     };
 
     // ============================================================
@@ -237,6 +237,7 @@
       );
       const [showGrid, setShowGrid] = useState(true);
       const [logScale, setLogScale] = useState(true);
+      const [activeP, setActiveP] = useState(null);
 
       const allData = useMemo(() => {
         const combined = [];
@@ -361,7 +362,20 @@
 
           {/* Chart */}
           <ResponsiveContainer width="100%" height={750}>
-            <LineChart data={allData} margin={{ top: 80, right: 40, left: 60, bottom: 120 }}>
+            <LineChart
+              data={allData}
+              margin={{ top: 80, right: 40, left: 60, bottom: 120 }}
+              onMouseMove={(e) => {
+                if (e && e.activePayload && e.activePayload.length > 0) {
+                  // Find the first non-null value to use as reference for horizontal line
+                  const val = e.activePayload.find(p => p.value !== null)?.value;
+                  setActiveP(val || null);
+                } else {
+                  setActiveP(null);
+                }
+              }}
+              onMouseLeave={() => setActiveP(null)}
+            >
               {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#333" />}
 
               <XAxis
@@ -384,7 +398,21 @@
                 ticks={logScale ? [10, 50, 100, 500, 1000, 2000, 4000, 6000] : [0, 1000, 2000, 3000, 4000, 5000, 6000]}
               />
 
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip
+                content={<CustomTooltip />}
+                cursor={{ stroke: '#888', strokeWidth: 1, strokeDasharray: '4 4', opacity: 0.5 }}
+              />
+
+              {/* Horizontal cursor line */}
+              {activeP && (
+                <ReferenceLine
+                  y={activeP}
+                  stroke="#888"
+                  strokeDasharray="4 4"
+                  opacity={0.25}
+                  isFront={true}
+                />
+              )}
 
               {/* Custom vertical segments and multiline labels */}
               <Customized component={(props) => <CustomElements {...props} visibleGases={visibleGases} />} />
@@ -392,7 +420,7 @@
               {/* 0°C reference line */}
               <ReferenceLine
                 x={273}
-                stroke="#4488ff"
+                stroke="#4477ff"
                 strokeDasharray="5 5"
                 strokeWidth={1}
               />

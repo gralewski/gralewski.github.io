@@ -26,8 +26,8 @@
     // GAS DATA - Phase change properties for Stationeers gases
     // ============================================================
     const gasData = {
-      N2:  { name: 'Nitrogen',        symbol: 'N₂',  color: '#444444', labelColor: '#999999', meltK: 40,  maxLiqK: 190, minCondKPa: 6.3,  maxKPa: 6000, convexity: 0.71 },
-      O2:  { name: 'Oxygen',          symbol: 'O₂',  color: '#ffffff', labelColor: '#ffffff', meltK: 56,  maxLiqK: 162, minCondKPa: 6.3,  maxKPa: 6000, convexity: 0.54 },
+      N2:  { name: 'Nitrogen',        symbol: 'N₂',  color: '#444444', labelColor: '#999999', meltK: 40,  maxLiqK: 190, minCondKPa: 6.3,  maxKPa: 6000, convexity: 0.847 },
+      O2:  { name: 'Oxygen',          symbol: 'O₂',  color: '#ffffff', labelColor: '#ffffff', meltK: 56,  maxLiqK: 162, minCondKPa: 6.3,  maxKPa: 6000, convexity: 0.73 },
       H2:  { name: 'Volatiles',       symbol: 'H₂',  color: '#ff4444', labelColor: '#ff4444', meltK: 81,  maxLiqK: 195, minCondKPa: 6.3,  maxKPa: 6000, convexity: 0.72 },
       X:   { name: 'Pollutant',       symbol: 'X',   color: '#ffcc00', labelColor: '#ffcc00', meltK: 173, maxLiqK: 425, minCondKPa: 1800, maxKPa: 6000, convexity: 0.5 },
       CO2: { name: 'Carbon Dioxide',  symbol: 'CO₂', color: '#888888', labelColor: '#888888', meltK: 218, maxLiqK: 265, minCondKPa: 517,  maxKPa: 6000, convexity: 0.5 },
@@ -413,6 +413,7 @@
                   strokeDasharray="4 4"
                   opacity={0.4}
                   isFront={true}
+                  isAnimationActive={false}
                 />
               ))}
 
@@ -440,6 +441,7 @@
                     activeDot={{ r: 5, fill: gas.color, stroke: '#fff', strokeWidth: 2 }}
                     connectNulls={false}
                     name={gas.symbol}
+                    isAnimationActive={false}
                   />
                 )
               ))}

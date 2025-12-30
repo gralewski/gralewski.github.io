@@ -241,7 +241,7 @@
 
       const allData = useMemo(() => {
         const combined = [];
-        for (let t = 30; t <= 660; t += 2) {
+        for (let t = 30; t <= 660; t += 0.5) {
           const point = { tempK: t };
           Object.entries(gasData).forEach(([key, gas]) => {
             point[key] = calcPressure(t, gas);
@@ -293,8 +293,8 @@
         const gas = gasData[dataKey];
         if (!gas) return null;
 
-        const prevTemp = payload.tempK - 2;
-        const nextTemp = payload.tempK + 2;
+        const prevTemp = payload.tempK - 0.5;
+        const nextTemp = payload.tempK + 0.5;
         const hasPrev = calcPressure(prevTemp, gas) !== null;
         const hasNext = calcPressure(nextTemp, gas) !== null;
 

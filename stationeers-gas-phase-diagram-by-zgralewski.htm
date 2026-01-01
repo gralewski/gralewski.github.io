@@ -26,13 +26,28 @@
     // GAS DATA - Phase change properties for Stationeers gases
     // ============================================================
     const gasData = {
-      N2:  { name: 'Nitrogen',        symbol: 'N₂',  color: '#444444', labelColor: '#999999', meltK: 40,  maxLiqK: 190, minCondKPa: 6.3,  maxKPa: 6000, convexity: 0.847 },
-      O2:  { name: 'Oxygen',          symbol: 'O₂',  color: '#ffffff', labelColor: '#ffffff', meltK: 56,  maxLiqK: 162, minCondKPa: 6.3,  maxKPa: 6000, convexity: 0.73 },
-      H2:  { name: 'Volatiles',       symbol: 'H₂',  color: '#ff4444', labelColor: '#ff4444', meltK: 81,  maxLiqK: 195, minCondKPa: 6.3,  maxKPa: 6000, convexity: 0.72 },
-      X:   { name: 'Pollutant',       symbol: 'X',   color: '#ffcc00', labelColor: '#ffcc00', meltK: 173, maxLiqK: 425, minCondKPa: 1800, maxKPa: 6000, convexity: 0.62 },
-      CO2: { name: 'Carbon Dioxide',  symbol: 'CO₂', color: '#888888', labelColor: '#888888', meltK: 218, maxLiqK: 265, minCondKPa: 517,  maxKPa: 6000, convexity: 0.5 },
-      N2O: { name: 'Nitrous Oxide',   symbol: 'N₂O', color: '#44cc44', labelColor: '#44cc44', meltK: 252, maxLiqK: 431, minCondKPa: 800,  maxKPa: 2000, convexity: 0.5 },
-      H2O: { name: 'Water',           symbol: 'H₂O', color: '#4488ff', labelColor: '#4488ff', meltK: 273, maxLiqK: 643, minCondKPa: 6.3,  maxKPa: 6000, convexity: 0.8367 },
+      N2:  { name: 'Nitrogen',        symbol: 'N₂',  color: '#444444', labelColor: '#999999', meltK: 40,  maxLiqK: 190, minCondKPa: 6.3,  maxKPa: 6000 },
+      O2:  { name: 'Oxygen',          symbol: 'O₂',  color: '#ffffff', labelColor: '#ffffff', meltK: 56,  maxLiqK: 162, minCondKPa: 6.3,  maxKPa: 6000 },
+      H2:  { name: 'Volatiles',       symbol: 'H₂',  color: '#ff4444', labelColor: '#ff4444', meltK: 81,  maxLiqK: 195, minCondKPa: 6.3,  maxKPa: 6000 },
+      X:   { name: 'Pollutant',       symbol: 'X',   color: '#ffcc00', labelColor: '#ffcc00', meltK: 173, maxLiqK: 425, minCondKPa: 1800, maxKPa: 6000 },
+      CO2: { name: 'Carbon Dioxide',  symbol: 'CO₂', color: '#888888', labelColor: '#888888', meltK: 218, maxLiqK: 265, minCondKPa: 517,  maxKPa: 6000 },
+      N2O: { name: 'Nitrous Oxide',   symbol: 'N₂O', color: '#44cc44', labelColor: '#44cc44', meltK: 252, maxLiqK: 431, minCondKPa: 800,  maxKPa: 2000 },
+      H2O: { name: 'Water',           symbol: 'H₂O', color: '#4488ff', labelColor: '#4488ff', meltK: 273, maxLiqK: 643, minCondKPa: 6.3,  maxKPa: 6000 },
+    };
+
+    // ============================================================
+    // GAS TUNING DATA - Curve shape parameters (convexity)
+    // convexityStart: controls curve at low temperatures (meltK)
+    // convexityEnd: controls curve at high temperatures (maxLiqK)
+    // ============================================================
+    const gasTuning = {
+      N2:  { convexityStart: 2.0000, convexityEnd: 1.3655 },
+      O2:  { convexityStart: 1.6053, convexityEnd: 1.3421 },
+      H2:  { convexityStart: 1.5189, convexityEnd: 1.2840 },
+      X:   { convexityStart: 1.5284, convexityEnd: 1.1966 },
+      CO2: { convexityStart: 1.0728, convexityEnd: 0.9811 },
+      N2O: { convexityStart: 1.3141, convexityEnd: 1.2111 },
+      H2O: { convexityStart: 1.5925, convexityEnd: 1.2736 },
     };
 
     // ============================================================
@@ -70,12 +85,18 @@
     const MIN_PRESSURE = 6.3;
     const MAX_PRESSURE_DISPLAY = 8000;
 
-    // Bezier-like interpolation for saturation curve
-    function calcPressure(tempK, gas) {
-      const { meltK, maxLiqK, minCondKPa, maxKPa, convexity } = gas;
+    // Asymmetric Bezier-like interpolation for saturation curve
+    // convexityStart controls curve shape at low temperatures (meltK)
+    // convexityEnd controls curve shape at high temperatures (maxLiqK)
+    function calcPressure(tempK, gas, tuning) {
+      const { meltK, maxLiqK, minCondKPa, maxKPa } = gas;
+      const { convexityStart, convexityEnd } = tuning;
       if (tempK < meltK || tempK > maxLiqK) return null;
       const t = (tempK - meltK) / (maxLiqK - meltK);
-      const exponent = 2 * (1 - t) * t * convexity + t * t;
+      const exponent =
+        (1 - t) * (1 - t) * t * convexityStart +  // Start influence
+        (1 - t) * t * t * convexityEnd +          // End influence
+        t * t;                                     // Base progression
       return minCondKPa * Math.pow(maxKPa / minCondKPa, exponent);
     }
 
@@ -244,7 +265,7 @@
         for (let t = 30; t <= 660; t += 1) {
           const point = { tempK: t };
           Object.entries(gasData).forEach(([key, gas]) => {
-            point[key] = calcPressure(t, gas);
+            point[key] = calcPressure(t, gas, gasTuning[key]);
           });
           combined.push(point);
         }
@@ -295,8 +316,8 @@
 
         const prevTemp = payload.tempK - 1;
         const nextTemp = payload.tempK + 1;
-        const hasPrev = calcPressure(prevTemp, gas) !== null;
-        const hasNext = calcPressure(nextTemp, gas) !== null;
+        const hasPrev = calcPressure(prevTemp, gas, gasTuning[dataKey]) !== null;
+        const hasNext = calcPressure(nextTemp, gas, gasTuning[dataKey]) !== null;
 
         if ((!hasPrev && hasNext) || (hasPrev && !hasNext)) {
           return <circle cx={cx} cy={cy} r={5} fill={gas.color} stroke="#1a1a1a" strokeWidth={2} />;

@@ -26,13 +26,21 @@
     // GAS DATA - Phase change properties for Stationeers gases
     // ============================================================
     const gasData = {
-      N2:  { name: 'Nitrogen',        symbol: 'N₂',  color: '#444444', labelColor: '#999999', meltK: 40,  maxLiqK: 190, minCondKPa: 6.3,  maxKPa: 6000 },
-      O2:  { name: 'Oxygen',          symbol: 'O₂',  color: '#ffffff', labelColor: '#ffffff', meltK: 56,  maxLiqK: 162, minCondKPa: 6.3,  maxKPa: 6000 },
-      H2:  { name: 'Volatiles',       symbol: 'H₂',  color: '#ff4444', labelColor: '#ff4444', meltK: 81,  maxLiqK: 195, minCondKPa: 6.3,  maxKPa: 6000 },
-      X:   { name: 'Pollutant',       symbol: 'X',   color: '#ffcc00', labelColor: '#ffcc00', meltK: 173, maxLiqK: 425, minCondKPa: 1800, maxKPa: 6000 },
-      CO2: { name: 'Carbon Dioxide',  symbol: 'CO₂', color: '#888888', labelColor: '#888888', meltK: 218, maxLiqK: 265, minCondKPa: 517,  maxKPa: 6000 },
-      N2O: { name: 'Nitrous Oxide',   symbol: 'N₂O', color: '#44cc44', labelColor: '#44cc44', meltK: 252, maxLiqK: 431, minCondKPa: 800,  maxKPa: 2000 },
-      H2O: { name: 'Water',           symbol: 'H₂O', color: '#4488ff', labelColor: '#4488ff', meltK: 273, maxLiqK: 643, minCondKPa: 6.3,  maxKPa: 6000 },
+      N2:   { name: 'Nitrogen',          symbol: 'N₂',   color: '#444444', labelColor: '#999999', meltK: 40,  maxLiqK: 190,  minCondKPa: 6.3,  maxKPa: 6000 },
+      O2:   { name: 'Oxygen',            symbol: 'O₂',   color: '#ffffff', labelColor: '#ffffff', meltK: 56,  maxLiqK: 162,  minCondKPa: 6.3,  maxKPa: 6000 },
+      H2:   { name: 'Hydrogen',          symbol: 'H₂',   color: '#ff4444', labelColor: '#ff4444', meltK: 15,  maxLiqK: 70,   minCondKPa: 6.3,  maxKPa: 6000 },
+      X:    { name: 'Pollutant',         symbol: 'X',    color: '#ffcc00', labelColor: '#ffcc00', meltK: 173, maxLiqK: 425,  minCondKPa: 1800, maxKPa: 6000 },
+      CO2:  { name: 'Carbon Dioxide',    symbol: 'CO₂',  color: '#888888', labelColor: '#888888', meltK: 218, maxLiqK: 265,  minCondKPa: 517,  maxKPa: 6000 },
+      N2O:  { name: 'Nitrous Oxide',     symbol: 'N₂O',  color: '#44cc44', labelColor: '#44cc44', meltK: 252, maxLiqK: 431,  minCondKPa: 800,  maxKPa: 2000 },
+      H2O:  { name: 'Water',             symbol: 'H₂O',  color: '#4488ff', labelColor: '#4488ff', meltK: 273, maxLiqK: 643,  minCondKPa: 6.3,  maxKPa: 6000 },
+      CH4:  { name: 'Methane',           symbol: 'CH₄',  color: '#C32826', labelColor: '#C32826', meltK: 81,  maxLiqK: 195,  minCondKPa: 6.3,  maxKPa: 6000 },
+      PH2O: { name: 'Polluted Water',    symbol: 'PH₂0', color: '#4488ff', labelColor: '#4488ff', meltK: 276, maxLiqK: 634,  minCondKPa: 6.3,  maxKPa: 6000 },
+      N2H4: { name: 'Hydrazine',         symbol: 'N₂H₄', color: '#f4821e', labelColor: '#f4821e', meltK: 246, maxLiqK: 521,  minCondKPa: 6.3,  maxKPa: 6000 },
+      ALC:  { name: 'Alcohol',           symbol: 'ALC',  color: '#683b00', labelColor: '#683b00', meltK: 232, maxLiqK: 424,  minCondKPa: 6.3,  maxKPa: 6000 },
+      NACL: { name: 'Sodium Chloride',   symbol: 'NaCl', color: '#ffeb10', labelColor: '#ffeb10', meltK: 606, maxLiqK: 2799, minCondKPa: 6.3,  maxKPa: 515  },
+      SIL:  { name: 'Silanol',           symbol: 'Sil',  color: '#683b00', labelColor: '#683b00', meltK: 164, maxLiqK: 822,  minCondKPa: 516,  maxKPa: 6000 },
+      HCL:  { name: 'Hydrochloric Acid', symbol: 'HCl',  color: '#059b58', labelColor: '#059b58', meltK: 247, maxLiqK: 431,  minCondKPa: 6.3,  maxKPa: 1000 },
+      O3:   { name: 'Ozone',             symbol: 'O₃',   color: '#79379a', labelColor: '#79379a', meltK: 0,   maxLiqK: 304,  minCondKPa: 81.4, maxKPa: 6000 },
     };
 
     // ============================================================
@@ -41,13 +49,22 @@
     // convexityEnd: controls curve at high temperatures (maxLiqK)
     // ============================================================
     const gasTuning = {
-      N2:  { convexityStart: 2.0000, convexityEnd: 1.3655 },
-      O2:  { convexityStart: 1.6053, convexityEnd: 1.3421 },
-      H2:  { convexityStart: 1.5189, convexityEnd: 1.2840 },
-      X:   { convexityStart: 1.5284, convexityEnd: 1.1966 },
-      CO2: { convexityStart: 1.0728, convexityEnd: 0.9811 },
-      N2O: { convexityStart: 1.3141, convexityEnd: 1.2111 },
-      H2O: { convexityStart: 1.5925, convexityEnd: 1.2736 },
+      N2:   { convexityStart: 2.0000, convexityEnd: 1.3655 },
+      O2:   { convexityStart: 1.6053, convexityEnd: 1.3421 },
+      H2:   { convexityStart: 1.5189, convexityEnd: 1.2840 },
+      X:    { convexityStart: 1.5284, convexityEnd: 1.1966 },
+      CO2:  { convexityStart: 1.0728, convexityEnd: 0.9811 },
+      N2O:  { convexityStart: 1.3141, convexityEnd: 1.2111 },
+      H2O:  { convexityStart: 1.5925, convexityEnd: 1.2736 },
+      CH4:  { convexityStart: ?, convexityEnd: ? },
+      PH2O: { convexityStart: ?, convexityEnd: ? },
+      N2H4: { convexityStart: ?, convexityEnd: ? },
+      ALC:  { convexityStart: ?, convexityEnd: ? },
+      NACL: { convexityStart: ?, convexityEnd: ? },
+      SIL:  { convexityStart: ?, convexityEnd: ? },
+      HCL:  { convexityStart: ?, convexityEnd: ? },
+      O3:   { convexityStart: ?, convexityEnd: ? },
+      
     };
 
     // ============================================================
@@ -58,13 +75,21 @@
     // y: positive = down, negative = up
     // ============================================================
     const labelOverrides = {
-      N2:  { melt: { x: 0,  y: 0 },   max: { x: -15, y: 0 } },
-      O2:  { melt: { x: 23,  y: 0 },   max: { x: -30, y: 0 } },
-      H2:  { melt: { x: 40,  y: -120 },   max: { x: 40,  y: 60 } },
-      X:   { melt: { x: 0,  y: -420 },   max: { x: 0,   y: 0 } },
-      CO2: { melt: { x: 0,  y: -340 },   max: { x: 0,   y: 0 } },
-      N2O: { melt: { x: 0,  y: -370 },   max: { x: 30,   y: 135 } },
-      H2O: { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
+      N2:   { melt: { x: 0,  y: 0 },   max: { x: -15, y: 0 } },
+      O2:   { melt: { x: 23,  y: 0 },   max: { x: -30, y: 0 } },
+      H2:   { melt: { x: 40,  y: -120 },   max: { x: 40,  y: 60 } },
+      X:    { melt: { x: 0,  y: -420 },   max: { x: 0,   y: 0 } },
+      CO2:  { melt: { x: 0,  y: -340 },   max: { x: 0,   y: 0 } },
+      N2O:  { melt: { x: 0,  y: -370 },   max: { x: 30,   y: 135 } },
+      H2O:  { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
+      CH4:  { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
+      PH2O: { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
+      N2H4: { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
+      ALC:  { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
+      NACL: { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
+      SIL:  { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
+      HCL:  { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
+      O3:   { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
     };
 
     // ============================================================

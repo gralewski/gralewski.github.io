@@ -218,25 +218,41 @@
   <script>
     // Gas data with fixed properties
     const gasData = {
-      N2:  { name: 'Nitrogen',        symbol: 'N₂',  color: '#444444', meltK: 40,  maxLiqK: 190, minCondKPa: 6.3,  maxKPa: 6000 },
-      O2:  { name: 'Oxygen',          symbol: 'O₂',  color: '#ffffff', meltK: 56,  maxLiqK: 162, minCondKPa: 6.3,  maxKPa: 6000 },
-      H2:  { name: 'Volatiles',       symbol: 'H₂',  color: '#ff4444', meltK: 81,  maxLiqK: 195, minCondKPa: 6.3,  maxKPa: 6000 },
-      X:   { name: 'Pollutant',       symbol: 'X',   color: '#ffcc00', meltK: 173, maxLiqK: 425, minCondKPa: 1800, maxKPa: 6000 },
-      CO2: { name: 'Carbon Dioxide',  symbol: 'CO₂', color: '#888888', meltK: 218, maxLiqK: 265, minCondKPa: 517,  maxKPa: 6000 },
-      N2O: { name: 'Nitrous Oxide',   symbol: 'N₂O', color: '#44cc44', meltK: 252, maxLiqK: 431, minCondKPa: 800,  maxKPa: 2000 },
-      H2O: { name: 'Water',           symbol: 'H₂O', color: '#4488ff', meltK: 273, maxLiqK: 643, minCondKPa: 6.3,  maxKPa: 6000 },
+      N2:  { name: 'Nitrogen',           symbol: 'N₂',   color: '#444444', meltK: 40,  maxLiqK: 190, minCondKPa: 6.3,  maxKPa: 6000 },
+      O2:  { name: 'Oxygen',             symbol: 'O₂',   color: '#ffffff', meltK: 56,  maxLiqK: 162, minCondKPa: 6.3,  maxKPa: 6000 },
+      H2:  { name: 'Hydrogen',           symbol: 'H₂',   color: '#ff4444', meltK: 15,  maxLiqK: 70,  minCondKPa: 6.3,  maxKPa: 6000 },
+      X:   { name: 'Pollutant',          symbol: 'X',    color: '#ffcc00', meltK: 173, maxLiqK: 425, minCondKPa: 1800, maxKPa: 6000 },
+      CO2: { name: 'Carbon Dioxide',     symbol: 'CO₂',  color: '#888888', meltK: 218, maxLiqK: 265, minCondKPa: 517,  maxKPa: 6000 },
+      N2O: { name: 'Nitrous Oxide',      symbol: 'N₂O',  color: '#44cc44', meltK: 252, maxLiqK: 431, minCondKPa: 800,  maxKPa: 2000 },
+      H2O: { name: 'Water',              symbol: 'H₂O',  color: '#4488ff', meltK: 273, maxLiqK: 643, minCondKPa: 6.3,  maxKPa: 6000 },
+      CH4:  { name: 'Methane',           symbol: 'CH₄',  color: '#C32826', meltK: 81,  maxLiqK: 195,  minCondKPa: 6.3,  maxKPa: 6000 },
+      PH2O: { name: 'Polluted Water',    symbol: 'PH₂0', color: '#4488ff', meltK: 276, maxLiqK: 634,  minCondKPa: 6.3,  maxKPa: 6000 },
+      N2H4: { name: 'Hydrazine',         symbol: 'N₂H₄', color: '#f4821e', meltK: 246, maxLiqK: 521,  minCondKPa: 6.3,  maxKPa: 6000 },
+      ALC:  { name: 'Alcohol',           symbol: 'ALC',  color: '#683b00', meltK: 232, maxLiqK: 424,  minCondKPa: 6.3,  maxKPa: 6000 },
+      NACL: { name: 'Sodium Chloride',   symbol: 'NaCl', color: '#ffeb10', meltK: 606, maxLiqK: 2799, minCondKPa: 6.3,  maxKPa: 515  },
+      SIL:  { name: 'Silanol',           symbol: 'Sil',  color: '#683b00', meltK: 164, maxLiqK: 822,  minCondKPa: 516,  maxKPa: 6000 },
+      HCL:  { name: 'Hydrochloric Acid', symbol: 'HCl',  color: '#059b58', meltK: 247, maxLiqK: 431,  minCondKPa: 6.3,  maxKPa: 1000 },
+      O3:   { name: 'Ozone',             symbol: 'O₃',   color: '#79379a', meltK: 0,   maxLiqK: 304,  minCondKPa: 81.4, maxKPa: 6000 },
     };
 
     // Default temperature points based on actual game measurements
     // These are the temperatures that work well in the game (avoiding jump issues)
     const defaultTemps = {
-      N2:  { t25: 78,  t50: 115, t75: 154 },
-      O2:  { t25: 83,  t50: 109, t75: 136 },
-      H2:  { t25: 110, t50: 138, t75: 167 },
-      X:   { t25: 236, t50: 299, t75: 362 },
-      CO2: { t25: 230, t50: 242, t75: 253 },
-      N2O: { t25: 297, t50: 342, t75: 387 },
-      H2O: { t25: 365, t50: 458, t75: 551 },
+      N2:   { t25: 78,  t50: 115, t75: 154 },
+      O2:   { t25: 83,  t50: 109, t75: 136 },
+      H2:   { t25: 29,  t50: 42,  t75: 56  },
+      X:    { t25: 236, t50: 299, t75: 362 },
+      CO2:  { t25: 230, t50: 242, t75: 253 },
+      N2O:  { t25: 297, t50: 342, t75: 387 },
+      H2O:  { t25: 365, t50: 458, t75: 551 },
+      CH4:  { t25: 109, t50: 138, t75: 166 },
+      PH2O: { t25: 365, t50: 455, t75: 544 },
+      N2H4: { t25: 315, t50: 383, t75: 452 },
+      ALC:  { t25: 280, t50: 328, t75: 376 },
+      NACL: { t25: 1154, t50: 1702, t75: 2250 },
+      SIL:  { t25: 328, t50: 493, t75: 657 },
+      HCL:  { t25: 293, t50: 339, t75: 385 },
+      O3:   { t25: 76, t50: 152, t75: 228  },
     };
 
     // Calculate temperature at given percentage (fallback)

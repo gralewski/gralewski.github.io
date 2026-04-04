@@ -287,7 +287,7 @@
 
       const allData = useMemo(() => {
         const combined = [];
-        for (let t = 30; t <= 660; t += 1) {
+        for (let t = 0; t <= 660; t += 1) {
           const point = { tempK: t };
           Object.entries(gasData).forEach(([key, gas]) => {
             point[key] = calcPressure(t, gas, gasTuning[key]);

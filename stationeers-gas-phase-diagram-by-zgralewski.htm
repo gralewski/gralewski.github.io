@@ -12,11 +12,11 @@
 <body>
   <div id="root"></div>
 
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/prop-types@15/prop-types.min.js" crossorigin></script>
-  <script src="https://unpkg.com/recharts@2.10.3/umd/Recharts.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="vendor/react.production.min.js"></script>
+  <script src="vendor/react-dom.production.min.js"></script>
+  <script src="vendor/prop-types.min.js"></script>
+  <script src="vendor/recharts.js"></script>
+  <script src="vendor/babel.min.js"></script>
 
   <script type="text/babel">
     const { useState, useMemo } = React;
@@ -29,18 +29,19 @@
       N2:   { name: 'Nitrogen',          symbol: 'N₂',   color: '#444444', labelColor: '#999999', meltK: 40,  maxLiqK: 190,  minCondKPa: 6.3,  maxKPa: 6000 },
       O2:   { name: 'Oxygen',            symbol: 'O₂',   color: '#ffffff', labelColor: '#ffffff', meltK: 56,  maxLiqK: 162,  minCondKPa: 6.3,  maxKPa: 6000 },
       H2:   { name: 'Hydrogen',          symbol: 'H₂',   color: '#ff4444', labelColor: '#ff4444', meltK: 15,  maxLiqK: 70,   minCondKPa: 6.3,  maxKPa: 6000 },
-      X:    { name: 'Pollutant',         symbol: 'X',    color: '#ffcc00', labelColor: '#ffcc00', meltK: 173, maxLiqK: 425,  minCondKPa: 1800, maxKPa: 6000 },
-      CO2:  { name: 'Carbon Dioxide',    symbol: 'CO₂',  color: '#888888', labelColor: '#888888', meltK: 218, maxLiqK: 265,  minCondKPa: 517,  maxKPa: 6000 },
-      N2O:  { name: 'Nitrous Oxide',     symbol: 'N₂O',  color: '#44cc44', labelColor: '#44cc44', meltK: 252, maxLiqK: 431,  minCondKPa: 800,  maxKPa: 2000 },
-      H2O:  { name: 'Water',             symbol: 'H₂O',  color: '#4488ff', labelColor: '#4488ff', meltK: 273, maxLiqK: 643,  minCondKPa: 6.3,  maxKPa: 6000 },
+      X:    { name: 'Pollutant',         symbol: 'X',    color: '#ffcc00', labelColor: '#ffcc00', meltK: 173, maxLiqK: 434,  minCondKPa: 1800, maxKPa: 6000 },
+      CO2:  { name: 'Carbon Dioxide',    symbol: 'CO₂',  color: '#888888', labelColor: '#888888', meltK: 218, maxLiqK: 266,  minCondKPa: 517,  maxKPa: 6000 },
+      N2O:  { name: 'Nitrous Oxide',     symbol: 'N₂O',  color: '#44cc44', labelColor: '#44cc44', meltK: 251, maxLiqK: 431,  minCondKPa: 800,  maxKPa: 2000 },
+      H2O:  { name: 'Water',             symbol: 'H₂O',  color: '#4488ff', labelColor: '#4488ff', meltK: 273, maxLiqK: 644,  minCondKPa: 6.3,  maxKPa: 6000 },
       CH4:  { name: 'Methane',           symbol: 'CH₄',  color: '#C32826', labelColor: '#C32826', meltK: 81,  maxLiqK: 195,  minCondKPa: 6.3,  maxKPa: 6000 },
-      PH2O: { name: 'Polluted Water',    symbol: 'PH₂0', color: '#50628a', labelColor: '#50628a', meltK: 276, maxLiqK: 634,  minCondKPa: 6.3,  maxKPa: 6000 },
+      PH2O: { name: 'Polluted Water',    symbol: 'PH₂O', color: '#50628a', labelColor: '#50628a', meltK: 276, maxLiqK: 634,  minCondKPa: 6.3,  maxKPa: 6000 },
       N2H4: { name: 'Hydrazine',         symbol: 'N₂H₄', color: '#f4821e', labelColor: '#f4821e', meltK: 246, maxLiqK: 521,  minCondKPa: 6.3,  maxKPa: 6000 },
-      //ALC:  { name: 'Alcohol',           symbol: 'ALC',  color: '#866233', labelColor: '#866233', meltK: 232, maxLiqK: 424,  minCondKPa: 6.3,  maxKPa: 1000 },
+      ALC:  { name: 'Alcohol',           symbol: 'ALC',  color: '#866233', labelColor: '#866233', meltK: 232, maxLiqK: 424,  minCondKPa: 6.3,  maxKPa: 1000 },
       NACL: { name: 'Sodium Chloride',   symbol: 'NaCl', color: '#ffeb10', labelColor: '#ffeb10', meltK: 606, maxLiqK: 2799, minCondKPa: 6.3,  maxKPa: 515  },
       SIL:  { name: 'Silanol',           symbol: 'Sil',  color: '#683b00', labelColor: '#683b00', meltK: 164, maxLiqK: 822,  minCondKPa: 516,  maxKPa: 6000 },
       HCL:  { name: 'Hydrochloric Acid', symbol: 'HCl',  color: '#059b58', labelColor: '#059b58', meltK: 247, maxLiqK: 431,  minCondKPa: 6.3,  maxKPa: 1000 },
-      O3:   { name: 'Ozone',             symbol: 'O₃',   color: '#79379a', labelColor: '#79379a', meltK: 81,  maxLiqK: 304,  minCondKPa: 81.4, maxKPa: 6000 },
+      O3:   { name: 'Ozone',             symbol: 'O₃',   color: '#79379a', labelColor: '#79379a', meltK: 81,  maxLiqK: 304,  minCondKPa: 250,  maxKPa: 6000 },
+      He:   { name: 'Helium',            symbol: 'He',   color: '#888888', labelColor: '#aaaaaa', wip: true },
     };
 
     // ============================================================
@@ -51,19 +52,19 @@
     const gasTuning = {
       N2:    { convexityStart: 2.0000, convexityEnd: 1.3655 },
       O2:    { convexityStart: 1.6053, convexityEnd: 1.3421 },
-      H2:    { convexityStart: 1.9842, convexityEnd: 1.3678 },
-      X:     { convexityStart: 1.5284, convexityEnd: 1.1966 },
-      CO2:   { convexityStart: 1.0728, convexityEnd: 0.9811 },
-      N2O:   { convexityStart: 1.3141, convexityEnd: 1.2111 },
-      H2O:   { convexityStart: 1.5925, convexityEnd: 1.2736 },
-      CH4:   { convexityStart: 1.4874, convexityEnd: 1.3137 },
-      PH2O:  { convexityStart: 1.4860, convexityEnd: 1.3020 },
-      N2H4:  { convexityStart: 1.4350, convexityEnd: 1.2857 },
-      //ALC:   { convexityStart: 1.3375, convexityEnd: 0.0000 },
+      H2:    { convexityStart: 2.0000, convexityEnd: 1.3331 },
+      X:     { convexityStart: 1.5508, convexityEnd: 1.3219 },
+      CO2:   { convexityStart: 1.0709, convexityEnd: 1.0793 },
+      N2O:   { convexityStart: 1.2822, convexityEnd: 1.2160 },
+      H2O:   { convexityStart: 1.5942, convexityEnd: 1.2833 },
+      CH4:   { convexityStart: 1.5126, convexityEnd: 1.2842 },
+      PH2O:  { convexityStart: 1.5054, convexityEnd: 1.2892 },
+      N2H4:  { convexityStart: 1.4565, convexityEnd: 1.2715 },
+      ALC:   { convexityStart: 1.3606, convexityEnd: 1.2204 },
       NACL:  { convexityStart: 2.0000, convexityEnd: 2.0000 },
-      SIL:   { convexityStart: 2.0000, convexityEnd: 1.3822 },
-      HCL:   { convexityStart: 1.3115, convexityEnd: 1.1952 },
-      O3:    { convexityStart: 2.0000, convexityEnd: 1.1733 },
+      SIL:   { convexityStart: 2.0000, convexityEnd: 1.3887 },
+      HCL:   { convexityStart: 1.3058, convexityEnd: 1.2140 },
+      O3:    { convexityStart: 1.8627, convexityEnd: 1.3690 },
       
     };
 
@@ -85,7 +86,7 @@
       CH4:  { melt: { x: 0,  y: 0 },   max: { x: 25,   y: 0 } },
       PH2O: { melt: { x: 30,  y: 0 },   max: { x: -15,   y: 0 } },
       N2H4: { melt: { x: -30,  y: 0 },   max: { x: 0,   y: 0 } },
-      //ALC:  { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
+      ALC:  { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
       NACL: { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
       SIL:  { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
       HCL:  { melt: { x: 30,  y: 0 },   max: { x: 30,   y: 0 } },
@@ -114,6 +115,7 @@
     // convexityStart controls curve shape at low temperatures (meltK)
     // convexityEnd controls curve shape at high temperatures (maxLiqK)
     function calcPressure(tempK, gas, tuning) {
+      if (gas.wip || !tuning) return null;
       const { meltK, maxLiqK, minCondKPa, maxKPa } = gas;
       const { convexityStart, convexityEnd } = tuning;
       if (tempK < meltK || tempK > maxLiqK) return null;
@@ -164,6 +166,7 @@
 
       Object.entries(gasData).forEach(([key, gas]) => {
         if (!visibleGases[key]) return;
+        if (gas.wip) return;
 
         const override = labelOverrides[key] || { melt: { x: 0, y: 0 }, max: { x: 0, y: 0 } };
         const colorOverride = labelColorOverrides[key] || {};
@@ -387,7 +390,7 @@
             </label>
             <span style={{ borderLeft: '1px solid #444', paddingLeft: '20px' }}>Gases:</span>
             {Object.entries(gasData).map(([key, gas]) => (
-              <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+              <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', opacity: gas.wip ? 0.6 : 1 }}>
                 <input
                   type="checkbox"
                   checked={visibleGases[key]}
@@ -401,7 +404,7 @@
                   border: '1px solid #666',
                   borderRadius: '2px'
                 }} />
-                {gas.symbol}
+                {gas.symbol}{gas.wip && ' (WIP)'}
               </label>
             ))}
           </div>

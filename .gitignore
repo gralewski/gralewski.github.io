@@ -1,0 +1,15 @@
+# Wewnetrzne instrukcje dla Claude Code
+CLAUDE.md
+
+# Wewnetrzne docs (workflow, snapshot, todo, metodyka)
+zzz-docs-*.md
+
+# Robocza tabela parametrow (zrodlem prawdy sa screeny w gazy/ i tooltipy gry)
+gases.md
+
+# Screeny tooltipow z gry - zrodlo danych dla Claude, niepotrzebne w deploy
+gazy/
+
+# Stare artefakty (gdyby kiedys wrocily)
+generate-gas-data.*
+stationeers-gas-data.md

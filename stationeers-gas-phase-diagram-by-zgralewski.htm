@@ -76,21 +76,21 @@
     // y: positive = down, negative = up
     // ============================================================
     const labelOverrides = {
-      N2:   { melt: { x: 0,  y: 0 },   max: { x: -25, y: 0 } },
-      O2:   { melt: { x: 23,  y: 0 },   max: { x: -30, y: 0 } },
-      H2:   { melt: { x: 40,  y: -120 },   max: { x: 40,  y: 60 } },
-      X:    { melt: { x: 0,  y: -420 },   max: { x: -30,   y: 0 } },
+      N2:   { melt: { x: 0,  y: 0 },   max: { x: 0, y: 0 } },
+      O2:   { melt: { x: 23,  y: 0 },   max: { x: 0, y: 0 } },
+      H2:   { melt: { x: 35,  y: -110 },   max: { x: 40,  y: 60 } },
+      X:    { melt: { x: 0,  y: -435 },   max: { x: 0,   y: 0 } },
       CO2:  { melt: { x: 0,  y: -340 },   max: { x: 0,   y: 0 } },
-      N2O:  { melt: { x: 0,  y: -370 },   max: { x: 30,   y: 135 } },
+      N2O:  { melt: { x: 0,  y: -370 },   max: { x: 35,   y: 125 } },
       H2O:  { melt: { x: 0,  y: 0 },   max: { x: 15,   y: 0 } },
-      CH4:  { melt: { x: 0,  y: 0 },   max: { x: 25,   y: 0 } },
+      CH4:  { melt: { x: 0,  y: 0 },   max: { x: 35,   y: 60 } },
       PH2O: { melt: { x: 30,  y: 0 },   max: { x: -15,   y: 0 } },
       N2H4: { melt: { x: -30,  y: 0 },   max: { x: 0,   y: 0 } },
-      ALC:  { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
-      NACL: { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
-      SIL:  { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 0 } },
-      HCL:  { melt: { x: 30,  y: 0 },   max: { x: 30,   y: 0 } },
-      O3:   { melt: { x: -65,  y: -300 },   max: { x: 0,   y: 0 } },
+      ALC:  { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 230 } },
+      NACL: { melt: { x: 0,  y: 0 },   max: { x: 0,   y: 500 } },
+      SIL:  { melt: { x: 0,  y: -350 },   max: { x: 0,   y: 100 } },
+      HCL:  { melt: { x: 30,  y: 0 },   max: { x: 35,   y: 200 } },
+      O3:   { melt: { x: -45,  y: -350 },   max: { x: 0,   y: 0 } },
     };
 
     // ============================================================
@@ -163,6 +163,11 @@
 
       const chartTop = yAxis.y;
       const chartBottom = yAxis.y + yAxis.height;
+      const chartLeft = xAxis.x;
+      const chartRight = xAxis.x + xAxis.width;
+      const xDomain = xAxis.scale.domain();
+      const xMinDomain = xDomain[0];
+      const xMaxDomain = xDomain[1];
 
       Object.entries(gasData).forEach(([key, gas]) => {
         if (!visibleGases[key]) return;
@@ -173,40 +178,48 @@
         const meltLabelColor = colorOverride.melt || gas.labelColor;
         const maxLabelColor = colorOverride.max || gas.labelColor;
 
-        const xMelt = xAxis.scale(gas.meltK);
-        const xMax = xAxis.scale(gas.maxLiqK);
+        const meltOffChart = gas.meltK < xMinDomain || gas.meltK > xMaxDomain;
+        const maxOffChart = gas.maxLiqK < xMinDomain || gas.maxLiqK > xMaxDomain;
+
+        // For off-chart labels, default position is near right edge - user tunes overlaps via labelOverrides
+        const xMelt = meltOffChart ? chartRight - 25 : xAxis.scale(gas.meltK);
+        const xMax = maxOffChart ? chartRight - 25 : xAxis.scale(gas.maxLiqK);
         const yMeltTop = yAxis.scale(gas.minCondKPa);
         const yMaxBottom = yAxis.scale(gas.maxKPa);
 
-        // Vertical line at melting point (down to bottom)
-        elements.push(
-          <line
-            key={`${key}-melt-line`}
-            x1={xMelt}
-            y1={yMeltTop}
-            x2={xMelt}
-            y2={chartBottom}
-            stroke={gas.color}
-            strokeWidth={2}
-            strokeDasharray="4 4"
-            opacity={0.7}
-          />
-        );
+        // Vertical line at melting point (down to bottom) - only if on chart
+        if (!meltOffChart) {
+          elements.push(
+            <line
+              key={`${key}-melt-line`}
+              x1={xMelt}
+              y1={yMeltTop}
+              x2={xMelt}
+              y2={chartBottom}
+              stroke={gas.color}
+              strokeWidth={2}
+              strokeDasharray="4 4"
+              opacity={0.7}
+            />
+          );
+        }
 
-        // Vertical line at max liquid (up to top)
-        elements.push(
-          <line
-            key={`${key}-max-line`}
-            x1={xMax}
-            y1={yMaxBottom}
-            x2={xMax}
-            y2={chartTop}
-            stroke={gas.color}
-            strokeWidth={2}
-            strokeDasharray="4 4"
-            opacity={0.7}
-          />
-        );
+        // Vertical line at max liquid (up to top) - only if on chart
+        if (!maxOffChart) {
+          elements.push(
+            <line
+              key={`${key}-max-line`}
+              x1={xMax}
+              y1={yMaxBottom}
+              x2={xMax}
+              y2={chartTop}
+              stroke={gas.color}
+              strokeWidth={2}
+              strokeDasharray="4 4"
+              opacity={0.7}
+            />
+          );
+        }
 
         // Melt label position (BELOW chart area)
         const meltLabelX = xMelt + override.melt.x;
@@ -269,7 +282,7 @@
             fontSize={14}
             textAnchor="middle"
           >
-            <tspan x={maxLabelX} dy="0">{gas.symbol}</tspan>
+            <tspan x={maxLabelX} dy="0">{gas.symbol}{maxOffChart && ' →'}</tspan>
             <tspan x={maxLabelX} dy={lineHeight}>{gas.maxLiqK}K</tspan>
             <tspan x={maxLabelX} dy={lineHeight}>{kToC(gas.maxLiqK)}°C</tspan>
             <tspan x={maxLabelX} dy={lineHeight}>{formatP(gas.maxKPa)}</tspan>
@@ -277,7 +290,7 @@
         );
       });
 
-      return <g>{elements}</g>;
+      return <g style={{ pointerEvents: 'none' }}>{elements}</g>;
     };
 
     function PhaseDiagram() {
@@ -466,9 +479,6 @@
                 />
               ))}
 
-              {/* Custom vertical segments and multiline labels */}
-              <Customized component={(props) => <CustomElements {...props} visibleGases={visibleGases} />} />
-
               {/* 0°C reference line */}
               <ReferenceLine
                 x={273}
@@ -494,6 +504,9 @@
                   />
                 )
               ))}
+
+              {/* Custom vertical segments and multiline labels - rendered LAST so they appear on top of curves */}
+              <Customized component={(props) => <CustomElements {...props} visibleGases={visibleGases} />} />
             </LineChart>
           </ResponsiveContainer>
         </div>
